@@ -31,11 +31,11 @@ Ohai.plugin(:DigitalOcean) do
     if File.exist?(DO_CLOUD_INIT_FILE)
       datasource = YAML.load_file(DO_CLOUD_INIT_FILE)
       if datasource["datasource_list"].include?("DigitalOcean")
-        Ohai::Log.debug("digital_ocean plugin: has_do_init? == true")
+        Ohai::Log.debug("DigitalOcean plugin: has_do_init? == true")
         true
       end
     else
-      Ohai::Log.debug("digital_ocean plugin: has_do_init? == false")
+      Ohai::Log.debug("DigitalOcean plugin: has_do_init? == false")
       false
     end
   end
@@ -50,13 +50,13 @@ Ohai.plugin(:DigitalOcean) do
 
   collect_data do
     if looks_like_digital_ocean?
-      Ohai::Log.debug("looks_like_digital_ocean? == true")
+      Ohai::Log.debug("DigitalOcean plugin: looks_like_digital_ocean? == true")
       digital_ocean Mash.new
       fetch_metadata.each do |k, v|
         digital_ocean[k] = v
       end
     else
-      Ohai::Log.debug("digitalocean plugin: No hints present for and doesn't look like digitalocean")
+      Ohai::Log.debug("DigitalOcean plugin: No hints present for and doesn't look like digitalocean")
       false
     end
   end
