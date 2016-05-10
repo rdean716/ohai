@@ -16,14 +16,14 @@
 # limitations under the License.
 #
 
-require 'spec_helper'
+require "spec_helper"
 
 describe Ohai::System, "plugin digital_ocean" do
   before(:each) do
     @plugin = get_plugin("digital_ocean")
-    allow(File).to receive(:exist?).with('/etc/chef/ohai/hints/digital_ocean.json').and_return(false)
+    allow(File).to receive(:exist?).with("/etc/chef/ohai/hints/digital_ocean.json").and_return(false)
     allow(File).to receive(:exist?).with('C:\chef\ohai\hints/digital_ocean.json').and_return(false)
-    allow(File).to receive(:exist?).with('/etc/cloud/cloud.cfg').and_return(false)
+    allow(File).to receive(:exist?).with("/etc/cloud/cloud.cfg").and_return(false)
   end
 
   shared_examples_for "!digital_ocean" do
@@ -38,7 +38,7 @@ describe Ohai::System, "plugin digital_ocean" do
     before(:each) do
       @http_client = double("Net::HTTP client")
       allow(@plugin).to receive(:http_client).and_return(@http_client)
-      allow(IO).to receive(:select).and_return([[],[1],[]])
+      allow(IO).to receive(:select).and_return([[], [1], []])
       t = double("connection")
       allow(t).to receive(:connect_nonblock).and_raise(Errno::EINPROGRESS)
       allow(Socket).to receive(:new).and_return(t)
@@ -46,38 +46,36 @@ describe Ohai::System, "plugin digital_ocean" do
     end
 
     let(:body) do
-     {"droplet_id" => 2756924,
+      {
+      "droplet_id" => 2756924,
       "hostname" => "sample-droplet",
       "vendor_data" => "#cloud-config\ndisable_root: false\n",
       "public_keys" => ["ssh-rsa pubey sammy@digitalocean.com"],
       "region" => "nyc3",
       "interfaces" => {
-        "private" => [
-          {
-            "ipv4" => {
-              "ip_address" => "10.132.255.113",
-              "netmask" => "255.255.0.0",
-              "gateway" => "10.132.0.1"
-            },
-            "mac" => "04:01:2a:0f:2a:02",
-            "type" => "private"
-          }
-        ],
-        "public" => [
-          {
-            "ipv4" => {
-              "ip_address" => "104.131.20.105",
-              "netmask" => "255.255.192.0",
-              "gateway" => "104.131.0.1"
-            },
-            "ipv6":{
-              "ip_address" => "2604:A880:0800:0010:0000:0000:017D:2001",
-              "cidr" => 64,
-              "gateway" => "2604:A880:0800:0010:0000:0000:0000:0001"
-            },
-            "mac" => "04:01:2a:0f:2a:01",
-            "type" => "public"}
-        ]
+        "private" => [{
+          "ipv4" => {
+            "ip_address" => "10.132.255.113",
+            "netmask" => "255.255.0.0",
+            "gateway" => "10.132.0.1"
+          },
+          "mac" => "04:01:2a:0f:2a:02",
+          "type" => "private"
+        }],
+        "public" => [{
+          "ipv4" => {
+            "ip_address" => "104.131.20.105",
+            "netmask" => "255.255.192.0",
+            "gateway" => "104.131.0.1"
+          },
+          "ipv6" => {
+            "ip_address" => "2604:A880:0800:0010:0000:0000:017D:2001",
+            "cidr" => 64,
+            "gateway" => "2604:A880:0800:0010:0000:0000:0000:0001"
+          },
+          "mac" => "04:01:2a:0f:2a:01",
+          "type" => "public"
+        }]
       },
       "floating_ip" => {
         "ipv4" => {
@@ -91,19 +89,19 @@ describe Ohai::System, "plugin digital_ocean" do
           "8.8.8.8"
         ]
       }
-     }
+    }
     end
 
     it "should fetch and properly parse json metadata" do
       expect(@http_client).to receive(:get).
         with("/metadata/v1.json").
-        and_return(double("Net::HTTP Response", :body => body, :code=>"200"))
+        and_return(double("Net::HTTP Response", :body => body, :code => "200"))
 
       @plugin.run
 
       expect(@plugin[:digital_ocean]).not_to be_nil
-      expect(@plugin[:digital_ocean]['droplet_id']).to eq(2756924)
-      expect(@plugin[:digital_ocean]['hostname']).to eq("sample-droplet")
+      expect(@plugin[:digital_ocean]["droplet_id"]).to eq(2756924)
+      expect(@plugin[:digital_ocean]["hostname"]).to eq("sample-droplet")
     end
 
     it "should complete the run despite unavailable metadata" do
@@ -112,7 +110,6 @@ describe Ohai::System, "plugin digital_ocean" do
         and_return(double("Net::HTTP Response", :body => "", :code => "404"))
 
       @plugin.run
-
 
       expect(@plugin[:digitalocean]).to be_nil
     end
