@@ -80,4 +80,12 @@ describe Ohai::System, "plugin digital_ocean" do
       allow(plugin).to receive(:hint?).with("digital_ocean").and_return(true)
     end
   end
+
+  describe "with digital_ocean DMI data" do
+    it_should_behave_like "digital_ocean"
+
+    before(:each) do
+      plugin[:dmi] = { :bios => { :all_records => [ { :Vendor => "DigitalOcean" } ] } }
+    end
+  end
 end
