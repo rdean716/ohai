@@ -72,6 +72,24 @@ Ohai.plugin(:Platform) do
     File.exist?("/etc/os-release") && os_release_info["CISCO_RELEASE_INFO"]
   end
 
+  #
+  # Determines the platform version for Debian based systems
+  #
+  # @returns [String] version of the platform
+  #
+  def debian_platform_version
+    if platform == 'cumulus'
+      if File.exist?('/etc/cumulus/etc.replace/os-release')
+        release_contents = File.read('/etc/cumulus/etc.replace/os-release')
+        release_contents.match(/VERSION_ID=(.*)/)[0] rescue 'unknown'
+      else
+        Ohai::Log.debug('Detected Cumulus Linux, but /etc/cumulus/etc/replace/os-release not found to determine platform_version')
+      end
+    else # not cumulus
+      File.read("/etc/debian_version").chomp
+    end
+  end
+
   collect_data(:linux) do
     # platform [ and platform_version ? ] should be lower case to avoid dealing with RedHat/Redhat/redhat matching
     if File.exist?("/etc/oracle-release")
@@ -94,10 +112,12 @@ Ohai.plugin(:Platform) do
       else
         if File.exist?("/usr/bin/raspi-config")
           platform "raspbian"
+        elsif Dir.exist?("/etc/cumulus")
+          platform "cumulus"
         else
           platform "debian"
         end
-        platform_version File.read("/etc/debian_version").chomp
+        platform_version debian_platform_version
       end
     elsif File.exist?("/etc/parallels-release")
       contents = File.read("/etc/parallels-release").chomp
@@ -190,7 +210,7 @@ Ohai.plugin(:Platform) do
     end
 
     case platform
-    when /debian/, /ubuntu/, /linuxmint/, /raspbian/
+    when /debian/, /ubuntu/, /linuxmint/, /raspbian/, /cumulus/
       platform_family "debian"
     when /fedora/, /pidora/
       platform_family "fedora"
